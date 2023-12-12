@@ -20,7 +20,7 @@ class Api
     /**
      * @var string
      */
-    protected ?string $url = null;
+    protected ?string $base_uri = null;
 
 
     protected CookieJar $cookies_jar;
@@ -76,7 +76,11 @@ class Api
                 throw new MyrentcarException("Impossible de se connecter (" . $response->getStatusCode() . ")");
             }
 
-            cache()->set('pixellweb-myrentcar',  $this->cookies_jar);
+            // On force la durée de vie du cookie. Sinon c'est 2 heures
+            foreach ($this->cookies_jar as $cookie) {
+                $cookie->setExpires(null);
+            }
+            cache()->put('pixellweb-myrentcar',  $this->cookies_jar);
 
         } catch (RequestException $exception) {
             throw new MyrentcarException("Api::login : " . $exception->getMessage());
@@ -87,30 +91,7 @@ class Api
 
     public function logout()
     {
-        $this->cookies_jar = new CookieJar();
-
-        $client = new Client([
-                'base_uri' => $this->base_uri
-            ]
-        );
-
-        $options = [
-            'headers' => [
-                'Content-Type' => 'application/json'
-            ],
-            'cookies' => $this->cookies_jar,
-        ];
-
-        try {
-            $response = $client->post('Login/Logout', $options );
-
-            // cache()->set('pixellweb-myrentcar',  $this->cookies_jar);
-
-        } catch (RequestException $exception) {
-            throw new MyrentcarException("Api::logout : " . $exception->getMessage());
-        }
-
-        return json_decode($response->getBody());
+        cache()->forget('pixellweb-myrentcar');
     }
 
 
@@ -153,10 +134,10 @@ class Api
             // Problème de connexion
             if ($exception->getCode() == 401) {
                 $this->login();
-                return $this->post($ressource_path, $parameters);
+                return $this->request($method, $ressource_path, $parameters);
             }
 
-            throw new MyrentcarException("Api::".$method." : " . $exception->getResponse()->getBody()->getContents() . ' '.print_r($parameters,true));
+            throw new MyrentcarException("Api::".$method." : " . $exception->getMessage() . " " . $exception->getResponse()->getBody()->getContents() . ' '.print_r($parameters,true));
         }
     }
 

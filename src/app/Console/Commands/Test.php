@@ -46,20 +46,29 @@ class Test extends Command
     public function handle()
     {
 
-        /*$api = new Api();
-        $api->logout();
+        $categorie = new Categorie();
+        dd($categorie->immatriculationDisponible(Carbon::now()->addDay(), Carbon::now()->addDays(7), 'SIEGE', 'B'));
+        dd($categorie->liste());
 
-        dd('rrr');*/
+        $reservation = new Reservation();
+        dd($reservation->create(\Ipsum\Reservation\app\Models\Reservation\Reservation::find(11)));
+        dd($reservation->annuler(1803 ));
+        //dd($reservation->get(1764 ));
+
+
+        $categorie = new Categorie();
+        dd($categorie->immatriculationDisponible(Carbon::now()->addDay(), Carbon::now()->addDays(7), 'SIEGE', 'B'));
+        dd($categorie->liste());
+
+
+        $api = new Api();
+        dd($api->logout());
 
         $tarif = new Tarif();
         dd($tarif->get('BASSE SAISON', 7, ['B', 'C']));
 
 
-        /*
-        $categorie = new Categorie();
-        //dd($categorie->disponible(Carbon::now()->addDay(), Carbon::now()->addDays(7), 'SIEGE'));
-        dd($categorie->liste());
-        */
+
 
 
 
@@ -69,10 +78,6 @@ class Test extends Command
         dd($api->get('Values/GetCategories'));
 
 
-        $reservation = new Reservation();
-        dd($reservation->create(\Ipsum\Reservation\app\Models\Reservation\Reservation::find(11)));
-        dd($reservation->annuler(1803 ));
-        //dd($reservation->get(1764 ));
 
     }
 

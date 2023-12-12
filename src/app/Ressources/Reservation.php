@@ -22,6 +22,8 @@ class Reservation extends Ressource
 
         $saison = Saison::betweenDates($reservation->debut_at, $reservation->fin_at)->first();
 
+        $categorie = new Categorie();
+        $immatriculation = $categorie->immatriculationDisponible($reservation->debut_at, $reservation->fin_at, $reservation->lieuDebut->custom_fields->hitech_code, $reservation->categorie->custom_fields->hitech_code);
 
         $parameters = [
             "Depart" => $reservation->debut_at->format('Y-m-d\TH:i:s'),
@@ -34,7 +36,7 @@ class Reservation extends Ressource
             "KmEstime" => 0,
             "CodeCategorie" => $reservation->categorie->custom_fields->hitech_code,
             "Note" => 'Réservation '. parse_url(config('app.url'), PHP_URL_HOST).' : '.$reservation->reference,
-            "ImmatriculationVehicule" => null, // N'attribue pas automatiquement de véhicule
+            "ImmatriculationVehicule" => $immatriculation, // N'attribue pas automatiquement de véhicule
             "InfosClient" => [
                 "Numero" => $this->getHitechCodeClient($reservation),
                 "Nom" => $reservation->nom,

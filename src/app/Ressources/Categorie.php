@@ -13,8 +13,7 @@ class Categorie extends Ressource
         return $this->api->get('Values/GetCategories');
     }
 
-
-    public function disponible(CarbonInterface $debut, CarbonInterface $fin, string $agence, string $categorie = null) :array
+    public function vehiculesDisponible(CarbonInterface $debut, CarbonInterface $fin, string $agence, string $categorie = null) :array
     {
         $vehicules = $this->api->get('Reservations/GetVehiculesDispoSurAgence',
             [
@@ -25,9 +24,13 @@ class Categorie extends Ressource
             ]
         );
 
-        if (!is_array($vehicules)) {
-            return [];
-        }
+        return is_array($vehicules) ? $vehicules : [];
+    }
+
+
+    public function disponible(CarbonInterface $debut, CarbonInterface $fin, string $agence, string $categorie = null) :array
+    {
+        $vehicules = $this->vehiculesDisponible($debut, $fin, $agence, $categorie);
 
         $categories = [];
         foreach ($vehicules as $vehicule) {
@@ -37,6 +40,14 @@ class Categorie extends Ressource
         }
 
         return $categories;
+    }
+
+
+    public function immatriculationDisponible(CarbonInterface $debut, CarbonInterface $fin, string $agence, string $categorie) : ?string
+    {
+        $vehicules = $this->vehiculesDisponible($debut, $fin, $agence, $categorie);
+
+        return $vehicules[0]['Immatriculation'] ?? null;
     }
 
 }
