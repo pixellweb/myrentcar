@@ -1,0 +1,31 @@
+{
+    "name": "pixellweb/myrentcar",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "B1nj",
+            "email": "postmaster@b1nj.fr"
+        }
+    ],
+    "minimum-stability": "stable",
+    "require": {
+        "guzzlehttp/guzzle": "^7.0.1",
+        "ipsum3/reservation": "2022.x-dev",
+        "ext-json": "*"
+    },
+    "autoload": {
+        "psr-4": {
+            "PixellWeb\\Myrentcar\\": "src"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+              "PixellWeb\\Myrentcar\\MyrentcarServiceProvider"
+            ]
+        }
+    },
+    "require-dev": {
+
+    }
+}
