@@ -8,6 +8,7 @@ use GuzzleHttp\Cookie\CookieJar;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Psr7;
+use GuzzleHttp\Psr7\Request;
 use Psr\Http\Message\ResponseInterface;
 use Psr\SimpleCache\InvalidArgumentException;
 
@@ -177,5 +178,30 @@ class Api
     public function put(string $ressource_path, array $params = []): array|null
     {
         return $this->request('PUT', $ressource_path, $params);
+    }
+
+
+    public function post_multipart(string $ressource_path, Psr7\MultipartStream $multipartStream): array|null
+    {
+        $client = new Client([
+            'base_uri' => $this->base_uri,
+        ]);
+
+        $headers = [
+            'headers' => [
+                'Content-Type' => 'multipart/form-data',
+            ]
+        ];
+
+        $request = new Request('POST', $ressource_path, $headers, $multipartStream);
+
+        // Envoyer la requête avec le client Guzzle
+        $response = $client->send($request, [
+            'cookies' => $this->cookies_jar
+        ]);
+
+        // Lire et retourner la réponse
+        $responseData = json_decode($response->getBody(), true);
+        return $responseData;
     }
 }

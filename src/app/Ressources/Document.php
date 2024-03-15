@@ -2,21 +2,36 @@
 
 namespace PixellWeb\Myrentcar\app\Ressources;
 
-
+use GuzzleHttp\Psr7\MultipartStream;
 
 class Document extends Ressource
 {
 
     public function create(int $key, string $type, string $libelle, string $file) :array
     {
-        return $this->api->post('Documents/InsertDocument',
+        // Ouvrir le fichier en lecture
+        $fileHandle = fopen($file, 'r');
+        // Créer un flux multipart contenant le fichier
+        $multipartStream = new MultipartStream([
             [
-                'CleMaitre' => $key,
-                'TypeEntity' => $type,
-                'Libelle' => $libelle,
-                'File' => base64_encode($file),
+                'name' => 'CleMaitre',
+                'contents' => $key
+            ],
+            [
+                'name' => 'TypeEntity',
+                'contents' => $type
+            ],
+            [
+                'name' => 'Libelle',
+                'contents' => $libelle
+            ],
+            [
+                'name' => 'File',
+                'contents' => $fileHandle
             ]
-        );
+        ]);
+
+        return $this->api->post_multipart('Documents/InsertDocument', $multipartStream);
 
     }
 
