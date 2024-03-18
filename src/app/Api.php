@@ -195,13 +195,23 @@ class Api
 
         $request = new Request('POST', $ressource_path, $headers, $multipartStream);
 
-        // Envoyer la requête avec le client Guzzle
-        $response = $client->send($request, [
-            'cookies' => $this->cookies_jar
-        ]);
+        try {
+            $response = $client->send($request, [
+                'cookies' => $this->cookies_jar
+            ]);
 
-        // Lire et retourner la réponse
-        $responseData = json_decode($response->getBody(), true);
-        return $responseData;
+            $responseData = json_decode($response->getBody(), true);
+
+            return $responseData;
+
+        } catch (\GuzzleHttp\Exception\ClientException $e) {
+            // Si le code de réponse est 401 (non autorisé), réessayez en vous connectant
+            if ($e->getResponse()->getStatusCode() === 401) {
+                $this->login();
+                return $this->post_multipart($ressource_path, $multipartStream);
+            } else {
+                throw $e;
+            }
+        }
     }
 }
