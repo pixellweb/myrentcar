@@ -15,7 +15,7 @@ class Reservation extends Ressource
     }
 
 
-    public function create(\Ipsum\Reservation\app\Models\Reservation\Reservation $reservation) :array
+    public function create(\Ipsum\Reservation\app\Models\Reservation\Reservation $reservation, ?string $saison_hitech_code = null) :array
     {
 
         $is_mobile = in_array(substr($reservation->telephone, 0, 2), ['06', '07']);
@@ -56,7 +56,7 @@ class Reservation extends Ressource
                 "Civilite" => null,
             ],
             "TarifClient" => [
-                "CodeTarif" => $saison->custom_fields->hitech_code,
+                "CodeTarif" => $saison_hitech_code ?? $saison->custom_fields->hitech_code,
                 "Remise" => 0,
                 "ModeRechercheDuree" => "BEST",
                 "NombreJoursBase" => $reservation->nb_jours,
