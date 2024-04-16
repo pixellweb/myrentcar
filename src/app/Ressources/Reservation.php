@@ -5,6 +5,7 @@ namespace PixellWeb\Myrentcar\app\Ressources;
 use Carbon\CarbonInterface;
 use Ipsum\Reservation\app\Location\Prestation;
 use Ipsum\Reservation\app\Models\Tarif\Saison;
+use Illuminate\Support\Str;
 
 class Reservation extends Ressource
 {
@@ -28,14 +29,14 @@ class Reservation extends Ressource
         $parameters = [
             "Depart" => $reservation->debut_at->format('Y-m-d\TH:i:s'),
             "CodeAgenceDepart" => $reservation->lieuDebut->custom_fields->hitech_code,
-            "LieuDepart" => $reservation->observation.($reservation->custom_fields->vol ? ' vol : '.$reservation->custom_fields->vol : ''),
+            "LieuDepart" =>  Str::limit(($reservation->observation.($reservation->custom_fields->vol ? ' vol : '.$reservation->custom_fields->vol : '')), 30, ''),
             "Retour" => $reservation->fin_at->format('Y-m-d\TH:i:s'),
             "CodeAgenceRetour" => $reservation->lieuFin->custom_fields->hitech_code,
             "LieuRetour" => null,
             "CodeAgenceTravail" => $reservation->lieuDebut->custom_fields->hitech_code, // Agence origine ?
             "KmEstime" => 0,
             "CodeCategorie" => $reservation->categorie->custom_fields->hitech_code,
-            "Note" => 'Réservation '. parse_url(config('app.url'), PHP_URL_HOST).' : '.$reservation->reference,
+            "Note" => 'Réservation '. parse_url(config('app.url'), PHP_URL_HOST).' : '.$reservation->reference."\n\r".$reservation->observation,
             "ImmatriculationVehicule" => $immatriculation, // N'attribue pas automatiquement de véhicule
             "InfosClient" => [
                 "Numero" => $this->getHitechCodeClient($reservation),
