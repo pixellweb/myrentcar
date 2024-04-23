@@ -16,7 +16,7 @@ class Reservation extends Ressource
     }
 
 
-    public function create(\Ipsum\Reservation\app\Models\Reservation\Reservation $reservation, ?string $saison_hitech_code = null) :array
+    public function create(\Ipsum\Reservation\app\Models\Reservation\Reservation $reservation, ?array $params  = []) :array
     {
 
         $is_mobile = in_array(substr($reservation->telephone, 0, 2), ['06', '07']);
@@ -44,7 +44,7 @@ class Reservation extends Ressource
                 "Prenom" => $reservation->prenom,
                 "Adresse1" => $reservation->adresse,
                 "Adresse2" => null,
-                "ComplementAdresse" => $reservation->custom_fields->societe,
+                "ComplementAdresse" => null,
                 "CodePostal" => $reservation->cp,
                 "Ville" => $reservation->ville,
                 "Telephone" => !$is_mobile ? $reservation->telephone : null,
@@ -57,7 +57,7 @@ class Reservation extends Ressource
                 "Civilite" => null,
             ],
             "TarifClient" => [
-                "CodeTarif" => $saison_hitech_code ?? $saison->custom_fields->hitech_code,
+                "CodeTarif" => $saison->custom_fields->hitech_code,
                 "Remise" => 0,
                 "ModeRechercheDuree" => "BEST",
                 "NombreJoursBase" => $reservation->nb_jours,
@@ -126,6 +126,19 @@ class Reservation extends Ressource
                 "MandatDate" => null,
                 "MandatNumero" => null
             ];
+        }
+
+        // Merge les params
+        foreach ($params as $key => $value) {
+            if (isset($parameters[$key])) {
+                if (is_array($value)) {
+                    foreach ($value as $subKey => $subValue) {
+                        $parameters[$key][$subKey] = $subValue;
+                    }
+                } else {
+                    $parameters[$key] = $value;
+                }
+            }
         }
 
         $resa = $this->api->post('Reservations/CreerReservation', $parameters);
