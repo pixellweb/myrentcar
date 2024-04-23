@@ -44,7 +44,7 @@ class Reservation extends Ressource
                 "Prenom" => $reservation->prenom,
                 "Adresse1" => $reservation->adresse,
                 "Adresse2" => null,
-                "ComplementAdresse" => null,
+                "ComplementAdresse" => $reservation->custom_fields->societe,
                 "CodePostal" => $reservation->cp,
                 "Ville" => $reservation->ville,
                 "Telephone" => !$is_mobile ? $reservation->telephone : null,
