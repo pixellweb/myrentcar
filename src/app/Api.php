@@ -116,6 +116,12 @@ class Api
 
         if ($method == 'GET') {
             $headers['query'] = $parameters;
+        } elseif ($method == 'PATCH') {
+            if(isset($parameters['codeAgenceTravail'])){
+                $headers['query'] = ["codeAgenceTravail" => $parameters['codeAgenceTravail']];
+                unset($parameters['codeAgenceTravail']);
+            }
+            $headers['json'] =  $parameters;
         } else {
             $headers['json'] = $parameters;
         }
@@ -178,6 +184,19 @@ class Api
     public function put(string $ressource_path, array $params = []): array|null
     {
         return $this->request('PUT', $ressource_path, $params);
+    }
+
+
+    /**
+     * @param string $ressource_path
+     * @param array $params
+     * @return array|null
+     * @throws GuzzleException
+     * @throws MyrentcarException
+     */
+    public function patch(string $ressource_path, array $params = []): array|null
+    {
+        return $this->request('PATCH', $ressource_path, $params);
     }
 
 

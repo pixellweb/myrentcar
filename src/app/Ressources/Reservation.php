@@ -143,6 +143,14 @@ class Reservation extends Ressource
 
         $resa = $this->api->post('Reservations/CreerReservation', $parameters);
 
+        if($this->getHitechCodeClient($reservation)){
+            $client = new Client();
+            $myrentcar_client = $client->getListe(['numero' => $this->getHitechCodeClient($reservation)]);
+            if($myrentcar_client && isset($myrentcar_client[0])){
+                $client->updateClientProperties($myrentcar_client[0]['ID'], $parameters);
+            }
+        }
+
         $reservation->custom_fields->hitech_code = $resa['CleDocument'];
         $reservation->custom_fields->hitech_numero = $resa['NumeroDocument'];
         $reservation->custom_fields->hitech_code_client = $resa['NumeroClient'];
