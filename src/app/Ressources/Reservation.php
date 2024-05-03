@@ -54,7 +54,7 @@ class Reservation extends Ressource
                 "ReponsesConducteur1" => null,
                 "ReponsesConducteur2" => null,
                 "ReponsesClient" => null,
-                "Civilite" => null,
+                "Civilite" => config('myrentcar.civilite_monsieur'),
             ],
             "TarifClient" => [
                 "CodeTarif" => $saison->custom_fields->hitech_code,
