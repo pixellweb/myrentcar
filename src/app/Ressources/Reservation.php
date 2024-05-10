@@ -86,13 +86,12 @@ class Reservation extends Ressource
         if ($reservation->prestations) {
             $prestations = Prestation::all();
             foreach ($reservation->prestations as $prestation) {
-                // TODO FAIRE REMONTER PRESTATION KM SUPP EN METTANT SOUSCRIPTIONS FALSE
                 $parameters["LignesPrix"][] = [
                     "IsPec" => false,
                     "CodeReservation" => null,
                     "NumeroReservation" => null,
                     "CodePrestation" => $prestations->find($prestation->id)->custom_fields->hitech_code, // LOCATION, TAXE AEROPORT, JOURS SUPP, KMS SUPP
-                    "LibellePrestation" => $prestation->tarification != "agence" ? $prestations->find($prestation->id)->custom_fields->hitech_code : $prestation->nom.' (en agence)',
+                    "LibellePrestation" => $prestation->tarification != "agence" ? $prestations->find($prestation->id)->custom_fields->hitech_code : Str::limit($prestation->nom.' (en agence)', 30),
                     "Montant" => $this->formatMontant($prestation->tarif),
                     "Souscription" => true,
                     "TypePrix" => '2',  // 1-Jour 2-Forfait f
@@ -100,6 +99,22 @@ class Reservation extends Ressource
                     "Plafond" => 0
                 ];
 
+            }
+
+            // FAIRE REMONTER PRESTATION KM SUPP EN METTANT SOUSCRIPTIONS FALSE
+            if($reservation->categorie->custom_fields->km_supplementaire){
+                $parameters["LignesPrix"][] = [
+                    "IsPec" => false,
+                    "CodeReservation" => null,
+                    "NumeroReservation" => null,
+                    "CodePrestation" => "KMS SUPP",
+                    "LibellePrestation" => 'Kilométage supplémentaire',
+                    "Montant" => $this->formatMontant($reservation->categorie->custom_fields->km_supplementaire),
+                    "Souscription" => false,
+                    "TypePrix" => '2',  // 1-Jour 2-Forfait f
+                    "Quantite" => '1',
+                    "Plafond" => 0
+                ];
             }
         }
 
