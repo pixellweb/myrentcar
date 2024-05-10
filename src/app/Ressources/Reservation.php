@@ -86,7 +86,7 @@ class Reservation extends Ressource
         if ($reservation->prestations) {
             $prestations = Prestation::all();
             foreach ($reservation->prestations as $prestation) {
-
+                // TODO FAIRE REMONTER PRESTATION KM SUPP EN METTANT SOUSCRIPTIONS FALSE
                 $parameters["LignesPrix"][] = [
                     "IsPec" => false,
                     "CodeReservation" => null,
@@ -147,7 +147,8 @@ class Reservation extends Ressource
             $client = new Client();
             $myrentcar_client = $client->getListe(['numero' => $this->getHitechCodeClient($reservation)]);
             if($myrentcar_client && isset($myrentcar_client[0])){
-                $client->updateClientProperties($myrentcar_client[0]['ID'], $parameters);
+                // TODO UPDATE INFO CLIENT MYRENTCAR
+                //$client->updateClientProperties($myrentcar_client[0]['ID'], $parameters);
             }
         }
 
