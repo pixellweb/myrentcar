@@ -116,6 +116,13 @@ class Reservation extends Ressource
                     "Plafond" => 0
                 ];
             }
+
+            // FAIRE REMONTER D'AUTRE INFORMATION
+            if($reservation->custom_fields->myrentcar_prestations){
+                foreach ($reservation->custom_fields->myrentcar_prestations as $prestation) {
+                    $parameters["LignesPrix"][] = $prestation;
+                }
+            }
         }
 
         $paiement = $reservation->paiements()->ok()->first();
