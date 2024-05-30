@@ -8,7 +8,7 @@ class Tarif extends Ressource
 {
 
 
-    public function get(string $code_tarif, int $duree, array $categories) :array
+    public function get(string $code_tarif, int $duree, array $categories, bool $weekend = false) :array
     {
         $tarifs_response = $this->api->get('Reservations/GetTarifParDuree',
             [
@@ -16,7 +16,7 @@ class Tarif extends Ressource
                 //'kmEstime' => null,
                 'codesCategories' => $categories,
                 'duree' => $duree,
-                //'weekend' => null,
+                'weekend' => $weekend ? 'true' : 'false',
                 //'inclurePrestations' => null,
             ]
         );
