@@ -73,7 +73,7 @@ class Reservation extends Ressource
                     "NumeroReservation" => null,
                     "CodePrestation" => config('myrentcar.code_prestation'),
                     "LibellePrestation" => config('myrentcar.libelle_prestation'),
-                    "Montant" => $this->formatMontant(($reservation->montant_base - $reservation->promotions->totalReductions())  / $reservation->nb_jours),
+                    "Montant" => $this->formatMontant($reservation->montant_base / $reservation->nb_jours),
                     "Souscription" => true,
                     "TypePrix" => '1',
                     "Quantite" => 1,
@@ -91,7 +91,7 @@ class Reservation extends Ressource
                     "CodeReservation" => null,
                     "NumeroReservation" => null,
                     "CodePrestation" => $prestations->find($prestation->id)->custom_fields->hitech_code, // LOCATION, TAXE AEROPORT, JOURS SUPP, KMS SUPP
-                    "LibellePrestation" => $prestation->tarification != "agence" ? $prestations->find($prestation->id)->custom_fields->hitech_code : Str::limit($prestation->nom.' (en agence)', 30),
+                    "LibellePrestation" => $prestation->tarification != "agence" ? $prestations->find($prestation->id)->custom_fields->hitech_code : Str::limit($prestation->nom.' (en agence)', 30, ''),
                     "Montant" => $this->formatMontant($prestation->tarif),
                     "Souscription" => true,
                     "TypePrix" => '2',  // 1-Jour 2-Forfait f
@@ -100,29 +100,45 @@ class Reservation extends Ressource
                 ];
 
             }
+        }
 
-            // FAIRE REMONTER PRESTATION KM SUPP EN METTANT SOUSCRIPTIONS FALSE
-            if($reservation->categorie->custom_fields->km_supplementaire){
-                $parameters["LignesPrix"][] = [
-                    "IsPec" => false,
-                    "CodeReservation" => null,
-                    "NumeroReservation" => null,
-                    "CodePrestation" => "KMS SUPP",
-                    "LibellePrestation" => 'Kilométage supplémentaire',
-                    "Montant" => $this->formatMontant($reservation->categorie->custom_fields->km_supplementaire),
-                    "Souscription" => false,
-                    "TypePrix" => '2',  // 1-Jour 2-Forfait f
-                    "Quantite" => '1',
-                    "Plafond" => 0
-                ];
-            }
+        // FAIRE REMONTER PRESTATION KM SUPP EN METTANT SOUSCRIPTIONS FALSE
+        if($reservation->categorie->custom_fields->km_supplementaire){
+            $parameters["LignesPrix"][] = [
+                "IsPec" => false,
+                "CodeReservation" => null,
+                "NumeroReservation" => null,
+                "CodePrestation" => "KMS SUPP",
+                "LibellePrestation" => 'Kilométage supplémentaire',
+                "Montant" => $this->formatMontant($reservation->categorie->custom_fields->km_supplementaire),
+                "Souscription" => false,
+                "TypePrix" => '2',  // 1-Jour 2-Forfait f
+                "Quantite" => '1',
+                "Plafond" => 0
+            ];
+        }
 
-            // FAIRE REMONTER D'AUTRE INFORMATION
-            if($reservation->custom_fields->myrentcar_prestations){
-                foreach ($reservation->custom_fields->myrentcar_prestations as $prestation) {
-                    $parameters["LignesPrix"][] = $prestation;
-                }
+        // FAIRE REMONTER D'AUTRE INFORMATION
+        if($reservation->custom_fields->myrentcar_prestations){
+            foreach ($reservation->custom_fields->myrentcar_prestations as $prestation) {
+                $parameters["LignesPrix"][] = $prestation;
             }
+        }
+
+
+        if ($reservation->promotions and $reservation->promotions->totalReductions()) {
+            $parameters["LignesPrix"][] = [
+                "IsPec" => false,
+                "CodeReservation" => null,
+                "NumeroReservation" => null,
+                "CodePrestation" => config('myrentcar.code_prestation_promotion'),
+                "LibellePrestation" => Str::limit($reservation->promotions->implode('nom', ', '), 30, ''),
+                "Montant" => -$this->formatMontant($reservation->promotions->totalReductions(), false),
+                "Souscription" => true,
+                "TypePrix" => '2',  // 1-Jour 2-Forfait f
+                "Quantite" => '1',
+                "Plafond" => 0
+            ];
         }
 
         $paiement = $reservation->paiements()->ok()->first();
@@ -186,11 +202,11 @@ class Reservation extends Ressource
         return $resa;
     }
 
-    protected function formatMontant(string|float $montant): float
+    protected function formatMontant(string|float $montant, bool $has_taxe = true): float
     {
         $montant_ttc = str_replace(',', '.', $montant ?? 0);
         // Retourne un montant HT
-        return $montant_ttc / (1 + (config('myrentcar.tva') / 100));
+        return $has_taxe ? $montant_ttc / (1 + (config('myrentcar.tva') / 100)) : $montant_ttc;
 
     }
 

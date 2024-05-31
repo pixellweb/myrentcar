@@ -18,6 +18,8 @@ return [
     "code_prestation" => 'LOCATION',
     "libelle_prestation" => 'LOCATION',
 
+    "code_prestation_promotion" => 'PROMOTION',
+
     "tva" => '8.5',
 
     "civilite_monsieur" => 151,
