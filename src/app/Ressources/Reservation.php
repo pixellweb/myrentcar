@@ -111,7 +111,7 @@ class Reservation extends Ressource
                 "CodePrestation" => "KMS SUPP",
                 "LibellePrestation" => 'Kilométage supplémentaire',
                 "Montant" => $this->formatMontant($reservation->categorie->custom_fields->km_supplementaire),
-                "Souscription" => false,
+                "Souscription" => true,
                 "TypePrix" => '2',  // 1-Jour 2-Forfait f
                 "Quantite" => '1',
                 "Plafond" => 0
