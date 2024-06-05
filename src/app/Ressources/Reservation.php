@@ -50,7 +50,7 @@ class Reservation extends Ressource
                 "Telephone" => !$is_mobile ? $reservation->telephone : null,
                 "Mobile" => $is_mobile ? $reservation->telephone : null,
                 "Mail" => $reservation->email,
-                "DateNaissance" => $reservation->naissance_at?->format('d/m/Y'),
+                "DateNaissance" => $reservation->naissance_at?->format('Y-m-d'),
                 "ReponsesConducteur1" => null,
                 "ReponsesConducteur2" => null,
                 "ReponsesClient" => null,
