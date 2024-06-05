@@ -6,6 +6,7 @@ use Carbon\CarbonInterface;
 use Ipsum\Reservation\app\Location\Prestation;
 use Ipsum\Reservation\app\Models\Tarif\Saison;
 use Illuminate\Support\Str;
+use PixellWeb\Myrentcar\app\MyrentcarException;
 
 class Reservation extends Ressource
 {
@@ -19,12 +20,45 @@ class Reservation extends Ressource
     public function create(\Ipsum\Reservation\app\Models\Reservation\Reservation $reservation, ?array $params  = []) :array
     {
 
+        $categorie = new Categorie();
+        $immatriculation = $categorie->immatriculationDisponible($reservation->debut_at, $reservation->fin_at, $reservation->lieuDebut->custom_fields->hitech_code, $reservation->categorie->custom_fields->hitech_code);
+
+        try {
+            $resa = $this->creerReservation($reservation, $params, $immatriculation);
+        } catch (MyrentcarException $e) {
+            if ($e->getResponseMessage() == 'WS_ERR_NOT_DISPO_VEHICULE') {
+                $resa = $this->creerReservation($reservation, $params);
+            } else {
+                throw $e;
+            }
+        }
+
+        if($this->getHitechCodeClient($reservation)){
+            $client = new Client();
+            $myrentcar_client = $client->getListe(['numero' => $this->getHitechCodeClient($reservation)]);
+            if($myrentcar_client && isset($myrentcar_client[0])){
+                // TODO UPDATE INFO CLIENT MYRENTCAR
+                //$client->updateClientProperties($myrentcar_client[0]['ID'], $parameters);
+            }
+        }
+
+        $reservation->custom_fields->hitech_code = $resa['CleDocument'];
+        $reservation->custom_fields->hitech_numero = $resa['NumeroDocument'];
+        $reservation->custom_fields->hitech_code_client = $resa['NumeroClient'];
+        $reservation->save();
+        if ($reservation->client) {
+            $reservation->client->custom_fields->hitech_code = $resa['NumeroClient'];
+            $reservation->client->save();
+        }
+
+        return $resa;
+    }
+
+    protected function creerReservation(\Ipsum\Reservation\app\Models\Reservation\Reservation $reservation, ?array $params, ?string $immatriculation = null): array
+    {
         $is_mobile = in_array(substr($reservation->telephone, 0, 2), ['06', '07']);
 
         $saison = Saison::betweenDates($reservation->debut_at, $reservation->fin_at)->first();
-
-        $categorie = new Categorie();
-        $immatriculation = $categorie->immatriculationDisponible($reservation->debut_at, $reservation->fin_at, $reservation->lieuDebut->custom_fields->hitech_code, $reservation->categorie->custom_fields->hitech_code);
 
         $parameters = [
             "Depart" => $reservation->debut_at->format('Y-m-d\TH:i:s'),
@@ -179,27 +213,11 @@ class Reservation extends Ressource
             }
         }
 
+
         $resa = $this->api->post('Reservations/CreerReservation', $parameters);
 
-        if($this->getHitechCodeClient($reservation)){
-            $client = new Client();
-            $myrentcar_client = $client->getListe(['numero' => $this->getHitechCodeClient($reservation)]);
-            if($myrentcar_client && isset($myrentcar_client[0])){
-                // TODO UPDATE INFO CLIENT MYRENTCAR
-                //$client->updateClientProperties($myrentcar_client[0]['ID'], $parameters);
-            }
-        }
-
-        $reservation->custom_fields->hitech_code = $resa['CleDocument'];
-        $reservation->custom_fields->hitech_numero = $resa['NumeroDocument'];
-        $reservation->custom_fields->hitech_code_client = $resa['NumeroClient'];
-        $reservation->save();
-        if ($reservation->client) {
-            $reservation->client->custom_fields->hitech_code = $resa['NumeroClient'];
-            $reservation->client->save();
-        }
-
         return $resa;
+
     }
 
     protected function formatMontant(string|float $montant, bool $has_taxe = true): float

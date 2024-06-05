@@ -9,6 +9,7 @@ use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Psr7;
 use GuzzleHttp\Psr7\Request;
+use Illuminate\Http\JsonResponse;
 use Psr\Http\Message\ResponseInterface;
 use Psr\SimpleCache\InvalidArgumentException;
 
@@ -35,7 +36,7 @@ class Api
         $this->base_uri = 'https://'.config('myrentcar.domain').config('myrentcar.path');
 
         if (cache()->get('pixellweb-myrentcar')) {
-             $this->cookies_jar = cache()->get('pixellweb-myrentcar');
+            $this->cookies_jar = cache()->get('pixellweb-myrentcar');
         } else {
             $this->login();
         }
@@ -131,7 +132,7 @@ class Api
             $response = $client->request($method, $ressource_path, $headers);
 
             if ($response->getStatusCode() != 200) {
-                throw new MyrentcarException("Api::".$method." : code http error (" . $response->getStatusCode() . ")  " . $ressource_path);
+                throw new MyrentcarException("Api::".$method." : code http error (" . $response->getStatusCode() . ")  " . $ressource_path, $response->getStatusCode(), $exception);
             }
 
             return json_decode($response->getBody(), true);
@@ -144,7 +145,7 @@ class Api
                 return $this->request($method, $ressource_path, $parameters);
             }
 
-            throw new MyrentcarException("Api::".$method." : " . $exception->getMessage() . " " . $exception->getResponse()->getBody()->getContents() . ' '.print_r($parameters,true));
+            throw new MyrentcarException("Api::".$method." : " . $exception->getMessage() . " " . $exception->getResponse()->getBody()->getContents() . ' '.print_r($parameters,true), $exception->getCode(), $exception);
         }
     }
 
@@ -224,13 +225,15 @@ class Api
             return $responseData;
 
         } catch (\GuzzleHttp\Exception\ClientException $e) {
-            // Si le code de réponse est 401 (non autorisé), réessayez en vous connectant
-            if ($e->getResponse()->getStatusCode() === 401) {
+
+            // Problème de connexion
+            if ($exception->getCode() == 401) {
                 $this->login();
                 return $this->post_multipart($ressource_path, $multipartStream);
-            } else {
-                throw $e;
             }
+
+            throw new MyrentcarException("Api::".$method." : " . $exception->getMessage() . " " . $exception->getResponse()->getBody()->getContents() . ' '.print_r($parameters,true), $exception->getCode(), $exception);
         }
+
     }
 }
