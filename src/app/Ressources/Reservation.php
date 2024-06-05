@@ -17,11 +17,14 @@ class Reservation extends Ressource
     }
 
 
-    public function create(\Ipsum\Reservation\app\Models\Reservation\Reservation $reservation, ?array $params  = []) :array
+    public function create(\Ipsum\Reservation\app\Models\Reservation\Reservation $reservation, ?array $params  = [], $attribution_vehicule = true) :array
     {
 
-        $categorie = new Categorie();
-        $immatriculation = $categorie->immatriculationDisponible($reservation->debut_at, $reservation->fin_at, $reservation->lieuDebut->custom_fields->hitech_code, $reservation->categorie->custom_fields->hitech_code);
+        $immatriculation = null;
+        if ($attribution_vehicule) {
+            $categorie = new Categorie();
+            $immatriculation = $categorie->immatriculationDisponible($reservation->debut_at, $reservation->fin_at, $reservation->lieuDebut->custom_fields->hitech_code, $reservation->categorie->custom_fields->hitech_code);
+        }
 
         try {
             $resa = $this->creerReservation($reservation, $params, $immatriculation);
