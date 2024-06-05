@@ -15,6 +15,8 @@ return [
 
     "mode_reglement" => 32,  // CARTE BANCAIRE WEB, PAYBOX...
 
+    "reglement_prefixe" => '',
+
     "code_prestation" => 'LOCATION',
     "libelle_prestation" => 'LOCATION',
 

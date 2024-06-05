@@ -184,7 +184,7 @@ class Reservation extends Ressource
                 "TypeDocument" => "CD",
                 "NumeroDocument" => null,
                 "CleModeReglement" => config('myrentcar.mode_reglement'),
-                "Libelle" => 'Réglement #'.$paiement->id,
+                "Libelle" => config('myrentcar.reglement_prefixe').$reservation->reference.' - régl #'.$paiement->id,
                 "TypeReglement" => "R",
                 "TypeTiers" => "C",
                 "DateReglement" => $paiement->created_at->format('Y-m-d\TH:i:s'),
