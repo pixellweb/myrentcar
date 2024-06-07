@@ -24,6 +24,9 @@ class Reservation extends Ressource
         if ($attribution_vehicule) {
             $categorie = new Categorie();
             $immatriculation = $categorie->immatriculationDisponible($reservation->debut_at, $reservation->fin_at, $reservation->lieuDebut->custom_fields->hitech_code, $reservation->categorie->custom_fields->hitech_code);
+            if (!$immatriculation and $reservation->lieuDebut->custom_fields->hitech_code_2) {
+                $immatriculation = $categorie->immatriculationDisponible($reservation->debut_at, $reservation->fin_at, $reservation->lieuDebut->custom_fields->hitech_code_2, $reservation->categorie->custom_fields->hitech_code);
+            }
         }
 
         try {
