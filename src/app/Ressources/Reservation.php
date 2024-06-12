@@ -17,7 +17,7 @@ class Reservation extends Ressource
     }
 
 
-    public function create(\Ipsum\Reservation\app\Models\Reservation\Reservation $reservation, ?array $params  = [], $attribution_vehicule = true) :array
+    public function create(\Ipsum\Reservation\app\Models\Reservation\Reservation $reservation, array $params  = [], $attribution_vehicule = true) :array
     {
 
         $immatriculation = null;
@@ -60,7 +60,7 @@ class Reservation extends Ressource
         return $resa;
     }
 
-    protected function creerReservation(\Ipsum\Reservation\app\Models\Reservation\Reservation $reservation, ?array $params, ?string $immatriculation = null): array
+    protected function creerReservation(\Ipsum\Reservation\app\Models\Reservation\Reservation $reservation, array $params, ?string $immatriculation = null): array
     {
         $is_mobile = in_array(substr($reservation->telephone, 0, 2), ['06', '07']);
 
@@ -79,16 +79,16 @@ class Reservation extends Ressource
             "Note" => 'Réservation '. parse_url(config('app.url'), PHP_URL_HOST).' : '.$reservation->reference."\n\r".$reservation->observation,
             "ImmatriculationVehicule" => $immatriculation, // N'attribue pas automatiquement de véhicule
             "InfosClient" => [
-                "Numero" => $this->getHitechCodeClient($reservation),
-                "Nom" => $reservation->nom,
-                "Prenom" => $reservation->prenom,
-                "Adresse1" => $reservation->adresse,
+                "Numero" => Str::limit($this->getHitechCodeClient($reservation), 10, ''),
+                "Nom" => Str::limit($reservation->nom, 30, ''),
+                "Prenom" => Str::limit($reservation->prenom, 30, ''),
+                "Adresse1" => Str::limit($reservation->adresse, 40, ''),
                 "Adresse2" => null,
                 "ComplementAdresse" => null,
-                "CodePostal" => $reservation->cp,
-                "Ville" => $reservation->ville,
-                "Telephone" => !$is_mobile ? $reservation->telephone : null,
-                "Mobile" => $is_mobile ? $reservation->telephone : null,
+                "CodePostal" => Str::limit($reservation->cp, 10, ''),
+                "Ville" => Str::limit($reservation->ville, 30, ''),
+                "Telephone" => Str::limit(!$is_mobile ? $reservation->telephone : null, 20, ''),
+                "Mobile" => Str::limit($is_mobile ? $reservation->telephone : null, 20, ''),
                 "Mail" => $reservation->email,
                 "DateNaissance" => $reservation->naissance_at?->format('Y-m-d'),
                 "ReponsesConducteur1" => null,
