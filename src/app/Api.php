@@ -224,7 +224,7 @@ class Api
 
             return $responseData;
 
-        } catch (\GuzzleHttp\Exception\ClientException $e) {
+        } catch (\GuzzleHttp\Exception\ClientException $exception) {
 
             // Problème de connexion
             if ($exception->getCode() == 401) {
@@ -232,7 +232,7 @@ class Api
                 return $this->post_multipart($ressource_path, $multipartStream);
             }
 
-            throw new MyrentcarException("Api::".$method." : " . $exception->getMessage() . " " . $exception->getResponse()->getBody()->getContents() . ' '.print_r($parameters,true), $exception->getCode(), $exception);
+            throw new MyrentcarException("Api::POST : " . $exception->getMessage() . " " . $exception->getResponse()->getBody()->getContents() . ' '.print_r($headers,true), $exception->getCode(), $exception);
         }
 
     }
