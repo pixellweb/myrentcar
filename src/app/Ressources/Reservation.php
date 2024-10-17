@@ -142,22 +142,6 @@ class Reservation extends Ressource
             }
         }
 
-        // FAIRE REMONTER PRESTATION KM SUPP EN METTANT SOUSCRIPTIONS FALSE
-        if($reservation->categorie->custom_fields->km_supplementaire){
-            $parameters["LignesPrix"][] = [
-                "IsPec" => false,
-                "CodeReservation" => null,
-                "NumeroReservation" => null,
-                "CodePrestation" => "KMS SUPP",
-                "LibellePrestation" => 'Kilométage supplémentaire',
-                "Montant" => $this->formatMontant($reservation->categorie->custom_fields->km_supplementaire),
-                "Souscription" => true,
-                "TypePrix" => '2',  // 1-Jour 2-Forfait f
-                "Quantite" => '1',
-                "Plafond" => 0
-            ];
-        }
-
         // FAIRE REMONTER D'AUTRE INFORMATION
         if($reservation->custom_fields->myrentcar_prestations){
             foreach ($reservation->custom_fields->myrentcar_prestations as $prestation) {
